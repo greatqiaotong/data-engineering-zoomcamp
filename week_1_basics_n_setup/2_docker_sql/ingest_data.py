@@ -8,6 +8,7 @@ from time import time
 
 import pandas as pd
 from sqlalchemy import create_engine
+import pyarrow.parquet as pq
 
 
 def main(params):
@@ -22,35 +23,44 @@ def main(params):
     # the backup files are gzipped, and it's important to keep the correct extension
     # for pandas to be able to open the file
     if url.endswith('.csv.gz'):
-        csv_name = 'output.csv.gz'
+        file_name = 'output.csv.gz'
+    elif url.endswith('.csv'):
+        file_name = 'output.csv'
+    elif url.endswith('.parquet'):
+        file_name = 'output.parquet'
     else:
-        csv_name = 'output.csv'
+        raise ValueError('Unexpected file type.')
 
-    os.system(f"wget {url} -O {csv_name}")
+    os.system(f"wget {url} -O {file_name}")
 
     engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{db}')
 
-    df_iter = pd.read_csv(csv_name, iterator=True, chunksize=100000)
-
-    df = next(df_iter)
-
-    df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
-    df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
+    if url.endswith('.parquet'):
+        parquet_file = pq.ParquetFile(file_name)
+        df_iter = parquet_file.iter_batches(batch_size=100000)
+        df = next(df_iter).to_pandas()
+    else:
+        df_iter = pd.read_csv(file_name, iterator=True, chunksize=100000)
+        df = next(df_iter)
+        df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
+        df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
 
     df.head(n=0).to_sql(name=table_name, con=engine, if_exists='replace')
 
     df.to_sql(name=table_name, con=engine, if_exists='append')
-
 
     while True: 
 
         try:
             t_start = time()
             
-            df = next(df_iter)
+            if url.endswith('.parquet'):
+                df = next(df_iter).to_pandas()
+            else:
+                df = next(df_iter)
 
-            df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
-            df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
+                df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
+                df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
 
             df.to_sql(name=table_name, con=engine, if_exists='append')
 
@@ -63,7 +73,7 @@ def main(params):
             break
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Ingest CSV data to Postgres')
+    parser = argparse.ArgumentParser(description='Ingest CSV/parquet data to Postgres')
 
     parser.add_argument('--user', required=True, help='user name for postgres')
     parser.add_argument('--password', required=True, help='password for postgres')
@@ -71,7 +81,7 @@ if __name__ == '__main__':
     parser.add_argument('--port', required=True, help='port for postgres')
     parser.add_argument('--db', required=True, help='database name for postgres')
     parser.add_argument('--table_name', required=True, help='name of the table where we will write the results to')
-    parser.add_argument('--url', required=True, help='url of the csv file')
+    parser.add_argument('--url', required=True, help='url of the csv/parquet file')
 
     args = parser.parse_args()
 
