@@ -308,3 +308,51 @@ Go to Compute Engine - Settings - Metadata, and copy and paste the content in th
     ```bash
     sudo shutdown now
     ```
+
+# Week 2
+
+## Data lake
+Data lake can store unstructured data while data warehouse is normally for structured data. 
+
+ETL (export, transform and load) is mainly used for a small amount of data, and it is a data warehouse solution.
+
+ELT (export, load and transform) is used for large amount of data, and it is a data lake solution.
+
+## Workflow orchestration
+
+A more complicated data workflow example:
+```
+(web)
+  ↓
+DOWNLOAD
+  ↓
+(csv)
+  ↓
+PARQUETIZE
+  ↓
+(parquet) ------→ UPLOAD TO S3
+  ↓
+UPLOAD TO GCS
+  ↓
+(parquet in GCS)
+  ↓
+UPLOAD TO BIGQUERY
+  ↓
+(table in BQ)
+```
+
+Sometimes data workflow/pipeline is also called DAG (directed acyclic graph).
+
+There are different data workflow orchestratoin tools, such as MAKE, LUIGI, APACHE AIRFLOW AND PREFECT.
+
+### Airflow
+
+**Ingesting data to GCP with Airflow**
+
+The tutorial is clearly instructed [here](https://github.com/DataTalksClub/data-engineering-zoomcamp/tree/main/cohorts/2022/week_2_data_ingestion/airflow).
+
+**Ingesting data to local Postgres with Airflow**
+
+Extra things that need to be done: install other dependencies in either requirement.txt or Dockerfile. Add environment variables for postgres in .env file.
+
+How to connect 2 docker-compose yaml files?
