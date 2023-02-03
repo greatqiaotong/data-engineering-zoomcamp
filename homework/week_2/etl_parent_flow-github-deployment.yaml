@@ -1,0 +1,62 @@
+###
+### A complete description of a Prefect Deployment for flow 'etl-parent-flow'
+###
+name: etl-web-gcs-bq-github
+description: null
+version: 8b92a9aa9805107da7f0bde95a3b7d7d
+# The work queue that will handle this deployment's runs
+work_queue_name: default
+tags: []
+parameters: {}
+schedule: null
+infra_overrides: {}
+infrastructure:
+  type: process
+  env: {}
+  labels: {}
+  name: null
+  command: null
+  stream_output: true
+  working_dir: null
+  block_type_slug: process
+  _block_type_slug: process
+
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: etl-parent-flow
+manifest_path: null
+storage:
+  repository: https://github.com/greatqiaotong/data-engineering-zoomcamp/tree/main/homework/week_2
+  reference: null
+  access_token: null
+  _block_document_id: b778b531-3c25-47b1-9e52-a1085450945a
+  _block_document_name: zoom-github
+  _is_anonymous: false
+  block_type_slug: github
+  _block_type_slug: github
+path: ''
+entrypoint: 03_etl_web_to_gcs_to_bq.py:etl_parent_flow
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties:
+    months:
+      title: months
+      position: 0
+      type: array
+      items:
+        type: integer
+    year:
+      title: year
+      position: 1
+      type: integer
+    color:
+      title: color
+      default: yellow
+      position: 2
+      type: string
+  required:
+  - months
+  - year
+  definitions: null
