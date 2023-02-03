@@ -355,4 +355,79 @@ The tutorial is clearly instructed [here](https://github.com/DataTalksClub/data-
 
 Extra things that need to be done: install other dependencies in either requirement.txt or Dockerfile. Add environment variables for postgres in .env file.
 
-How to connect 2 docker-compose yaml files?
+How to connect 2 docker-compose yaml files? Start Airflow services first and then there will be a network called ```airflow-default``` created. All we need to do is to specify the 2nd docker-compose to run in this network.
+
+### Prefect
+
+Prefect has tasks and flows. In tasks we can add arguments such as ```log_prints``` for logging, ```reties``` for automatic retries etc. Some tasks can be cached so that the finished state can be shared across flows to save expensive runs from running with every flow, with ```cache_key_fn``` specified in the task decorator auguments.
+
+To use Prefect UI, we need to specify the following and start Prefect Orion:
+```bash
+prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api
+prefect orion start
+```
+
+A cool feature in Prefect is ```Blocks```, which enable the storage of configuration and provide an interface for interacting with external systems. ```Blocks``` are useful for configuation that needs to be shared across flow runs and between flows (such as credentials for authenticating services like AWS, GitHub, Slack etc.). For configuration that will change between flow runs, ```parameters``` are recommended.
+
+The configuration of Prefect SQLAlchemy block is as below:
+<img src="images/Prefect_SQLAlchemy_block_configuration.png"/>
+
+If interesting blocks are missing from the UI, make sure to register them first. For example, we use the following command to register the GCP blocks:
+```bash
+prefect block register -m prefect_gcp
+```
+
+In order to access GCS bucket with Prefect block, we need to specify it as follows.
+<img src="images/GCS_bucket_prefect_block.png"/>
+
+#### Prefect deployment
+
+To deploy the flow, we can use:
+```bash
+prefect deployment build ./parameterized_flow.py:etl_parent_flow -n "Parameterized ETL"
+```
+
+Then a yaml file will be generated and we can edit the parameters inside. Please note the parameters can also be added on the UI.
+
+In order to run the deployment, we need to apply it using:
+```bash
+prefect deployment apply etl_parent_flow-deployment.yaml
+```
+
+To run orchestrated deployments, we must configure at least one agent to get scheduled work from a work queue using:
+```bash
+prefect agent start --work-queue default
+```
+
+Once agent is started, we can run deployment using the following command:
+```bash
+prefect deployment run etl-parent-flow/Parameterized ETL
+```
+
+We can also set up notifications in the UI. There are different webhooks such as Teams or Slack that we can trigger.
+
+Deployment can be scheduled in the UI, including options using interval and CRON. RRule (recurrent rule) can be specified via command line. Interval and CRON can also be specified via command line by adding ```--cron``` option in ```prefect deployment build```.
+
+#### Running flows in Docker containers
+
+Build a Docker image and push to the Docker hub. We also need to add a Docker Container block in Prefect UI by specifying a few things as below:
+* Block Name: can be Zoom
+* Image: the Docker image we just built and pushed to Docker hub
+* ImagePullPolicy: Always
+* Auto remove: true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
