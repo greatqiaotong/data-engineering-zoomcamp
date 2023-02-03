@@ -1,15 +1,21 @@
 ###
 ### A complete description of a Prefect Deployment for flow 'etl-parent-flow'
 ###
-name: etl-web-gcs-bq-github
+name: github_flow
 description: null
-version: 8b92a9aa9805107da7f0bde95a3b7d7d
+version: 6e04fa41ab5463f21560d1599fd059bf
 # The work queue that will handle this deployment's runs
 work_queue_name: default
 tags: []
 parameters: {}
 schedule: null
 infra_overrides: {}
+
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: etl-parent-flow
+manifest_path: null
 infrastructure:
   type: process
   env: {}
@@ -18,16 +24,13 @@ infrastructure:
   command: null
   stream_output: true
   working_dir: null
+  _block_document_id: 8c4af0e6-cea2-4da9-9fe2-0214568fed64
+  _block_document_name: anonymous-4503502e-0d1a-41af-9507-3f0718d1f2b2
+  _is_anonymous: true
   block_type_slug: process
   _block_type_slug: process
-
-###
-### DO NOT EDIT BELOW THIS LINE
-###
-flow_name: etl-parent-flow
-manifest_path: null
 storage:
-  repository: https://github.com/greatqiaotong/data-engineering-zoomcamp/tree/main/homework/week_2
+  repository: https://github.com/greatqiaotong/data-engineering-zoomcamp.git
   reference: null
   access_token: null
   _block_document_id: b778b531-3c25-47b1-9e52-a1085450945a
@@ -36,7 +39,7 @@ storage:
   block_type_slug: github
   _block_type_slug: github
 path: ''
-entrypoint: 03_etl_web_to_gcs_to_bq.py:etl_parent_flow
+entrypoint: homework/week_2/03_etl_web_to_gcs_to_bq.py:etl_parent_flow
 parameter_openapi_schema:
   title: Parameters
   type: object

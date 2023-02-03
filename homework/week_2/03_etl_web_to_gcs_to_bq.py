@@ -71,7 +71,7 @@ def write_bq(df: pd.DataFrame) -> None:
     gcp_credentials_block = GcpCredentials.load("zoom-gcp-creds")
 
     df.to_gbq(
-        destination_table="dezoomcamp.rides",
+        destination_table="dezoomcamp.greenrides",
         project_id="snappy-way-375310",
         credentials=gcp_credentials_block.get_credentials_from_service_account(),
         chunksize=500_000,
